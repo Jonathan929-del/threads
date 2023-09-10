@@ -4,6 +4,7 @@ import {connectToDb} from '../mongoose';
 import User from '../models/user.model';
 import {revalidatePath} from 'next/cache';
 import Thread from '../models/thread.model';
+import Community from '../models/community.model';
 
 
 
@@ -21,18 +22,32 @@ export const createThread = async ({text, author, communityId, path}:Params) => 
         
         // Db connection
         connectToDb();
+
+
+        // Community id object
+        const communityIdObject = await Community.findOne(
+            {id:communityId},
+            {_id:1}
+        );
     
         // Creating thread
         const createdThread = await Thread.create({
             text,
             author,
-            community:null
+            community:communityIdObject
         });
     
         // Updating user
         await User.findByIdAndUpdate(author, {
             $push:{threads:createdThread._id}
-        })
+        });
+
+        // Updating community
+        if (communityIdObject) {
+            await Community.findByIdAndUpdate(communityIdObject, {
+                $push: {threads:createdThread._id},
+            });
+        };
     
         // Revalidating path
         revalidatePath(path);
@@ -48,22 +63,26 @@ export const createThread = async ({text, author, communityId, path}:Params) => 
 export const fetchThreads = async (pageNumber = 1, pageSize=20) => {
     try {
 
-
         // Db connection
         connectToDb();
 
-
         // Skip amount
         const skipAmount = (pageNumber - 1) * pageSize;
-    
-    
+        
         // Threads fetching
         const threadsQuery = Thread
             .find({parentId:{$in:[null, undefined]}})
             .sort({createdAt:'desc'})
             .skip(skipAmount)
             .limit(pageSize)
-            .populate({path:'author', model:User})
+            .populate({
+                path:'author',
+                model:User
+            })
+            .populate({
+                path:'community',
+                model:Community,
+            })
             .populate({
                 path:'children',
                 populate:{
@@ -75,8 +94,8 @@ export const fetchThreads = async (pageNumber = 1, pageSize=20) => {
         const totalThreadsCount = await Thread.countDocuments({parentId:{$in:[null, undefined]}});
         const threads = await threadsQuery.exec();
         const isNext = totalThreadsCount > skipAmount + threads.length;
+
         return {threads, isNext};
-    
         
     } catch (err:any) {
         throw new Error(`Error fetching threads: ${err}`);   

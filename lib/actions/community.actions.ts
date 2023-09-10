@@ -1,4 +1,4 @@
-"use server";
+'use server';
 // Imports
 import User from '../models/user.model';
 import {connectToDb} from '../mongoose';

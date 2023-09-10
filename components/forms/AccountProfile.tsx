@@ -13,7 +13,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {updateUser} from '@/lib/actions/user.actions';
 import {UserValidation} from '@/lib/validations/user';
 import {usePathname, useRouter} from 'next/navigation';
-import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 
 
 

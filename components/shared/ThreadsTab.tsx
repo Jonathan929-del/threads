@@ -3,6 +3,7 @@ import React from 'react';
 import {redirect} from 'next/navigation';
 import ThreadCard from '../cards/ThreadCard';
 import {fetchUserPosts} from '@/lib/actions/user.actions';
+import {fetchCommunityPosts} from '@/lib/actions/community.actions';
 
 
 
@@ -19,15 +20,21 @@ interface Params {
 const ThreadsTab = async ({currentUserId, accountId, accountType}:Params) => {
 
 
-    // Fetching user posts
-    const result = await fetchUserPosts(accountId);
-    if(!result) redirect('/');
-    // console.log(result.threads[0].author);
+    // Fetching posts
+    let result:any;
+    if(accountType === 'Community'){
+        result = await fetchCommunityPosts(accountId)
+    }else{
+        result = await fetchUserPosts(accountId);
+    };
+    if(!result) {
+        redirect('/');
+    };
 
 
     return (
         <section className='mt-9 flex flex-col gap-10'>
-            {result.threads.map((thread:any) => (
+            {result?.threads.map((thread:any) => (
                 <ThreadCard
                     key={thread._id}
                     id={thread._id}

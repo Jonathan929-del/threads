@@ -12,12 +12,13 @@ interface Params {
     username:string;
     imgUrl:string;
     bio:string;
+    type?:'User' | 'Community'
 };
 
 
 
 // Main function
-const ProfileHeader = ({accountId, authUserId, name, username, imgUrl, bio}:Params) => {
+const ProfileHeader = ({accountId, authUserId, name, username, imgUrl, bio, type}:Params) => {
   return (
     <div className='flex w-full flex-col justify-start'>
         <div className='flex items-center justify-between'>
